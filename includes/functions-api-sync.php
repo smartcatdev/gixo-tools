@@ -2,7 +2,7 @@
 
 namespace gixo;
 
-add_action( 'gixo_get_sessions', function() {
+add_action( 'init', function() {
     
     SyncService::instance();
     
@@ -36,44 +36,37 @@ Class SyncService {
     }
 
     private function sync_sessions( $sessions ) {
+        
+        foreach ( $sessions as $sessionID => $data ) {
 
-        $query = new \WP_Query( array (
-            'post_type' => 'session',
-            'status' => 'publish',
-            'meta_query' => array (
-                array (
-                    'key' => 'sessionID',
-                    'value' => array_keys( $sessions ),
-                    'compare' => 'IN'
-                )
-            ),
-                ) );
-
-        if ( $query->have_posts() ) {
-
-            foreach ( $query->posts as $post ) {
-
-                wp_update_post( array (
-                    'ID' => $post->ID,
-                    'post_title' => $sessions[ get_post_meta( $post->ID, 'sessionID', true ) ],
-                ) );
-
-                unset( $sessions[ get_post_meta( $post->ID, 'sessionID', true ) ] );
-            }
-        }
-
-        foreach ( $sessions as $sessionID => $title ) {
-
-            if ( !get_page_by_title( $title, OBJECT, 'session' ) ) {
-
+            
+            $query = new \WP_Query( array (
+                'post_type' => 'session',
+                'post_status' => 'publish',
+                'meta_query' => array (
+                    array (
+                        'key' => 'sessionID',
+                        'value' => $sessionID,
+                        'compare' => '='
+                    )
+                ),
+            ) );
+            
+            if( $query->have_posts() ) {
+                continue;
+            }else {
+                
                 $id = wp_insert_post( array (
-                    'post_title' => $title,
+                    'post_title' => $data['title'],
                     'post_type' => 'session',
                     'post_status' => 'publish'
-                        ) );
+                ) );
 
-                update_post_meta( $id, 'sessionID', $sessionID );
+                update_post_meta( $id, 'sessionID', $sessionID );                
+                update_post_meta( $id, 'duration', $data['duration'] );                
+                
             }
+            
         }
 
 
@@ -90,7 +83,7 @@ Class SyncService {
 
         $query = new \WP_Query( array (
             'post_type' => 'session',
-            'status' => 'publish',
+            'post_status' => 'publish',
             'meta_query' => array (
                 array (
                     'key' => 'sessionID',
@@ -98,7 +91,7 @@ Class SyncService {
                     'compare' => 'NOT IN'
                 )
             ),
-                ) );
+        ) );
 
         if ( $query->have_posts() ) {
 
@@ -119,10 +112,10 @@ Class SyncService {
      */
     private function get_sessions() {
 
-
         $session_response = wp_remote_get( 'http://alpha.gixo.com/rest/sessions?query_type=all' );
 
         return $this->format_response( $session_response );
+        
     }
 
     private function format_response( $data ) {
@@ -137,7 +130,10 @@ Class SyncService {
 
         foreach ( $data as $session ) {
 
-            $sessions[ $session->sessionID ] = $session->descriptor->title;
+            $sessions[ $session->sessionID ] = array(
+                'title'     => $session->descriptor->title,
+                'duration'  => $session->time->total_seconds
+            );
         }
 
         return $sessions;

@@ -41,8 +41,6 @@ trait Singleton {
      */
     public static function instance() {
 
-        error_log( 'instance' );
-        
         if ( is_null( self::$instance ) ) {
             self::$instance = new self();
             self::$instance->initialize();
