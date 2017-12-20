@@ -24,20 +24,20 @@ Class SyncService {
 
         set_transient( 'gixo_doing_sync', true, 60 );
 
-        $sessions = $this->get_sessions();
+        $descriptors = $this->get_descriptors();
 
-        // Delete sessions that don't exist anymore
-        $this->delete_sessions( $sessions );
+        // Delete descriptors that don't exist anymore
+        $this->delete_descriptors( $descriptors );
 
-        // Create/update valid sessions
-        $this->sync_sessions( $sessions );
+        // Create/update valid descriptors
+        $this->sync_descriptors( $descriptors );
 
         delete_transient( 'gixo_doing_sync' );
     }
 
-    private function sync_sessions( $sessions ) {
+    private function sync_descriptors( $descriptors ) {
         
-        foreach ( $sessions as $sessionID => $data ) {
+        foreach ( $descriptors as $descriptorID => $data ) {
 
             
             $query = new \WP_Query( array (
@@ -45,8 +45,8 @@ Class SyncService {
                 'post_status' => 'publish',
                 'meta_query' => array (
                     array (
-                        'key' => 'sessionID',
-                        'value' => $sessionID,
+                        'key' => 'descriptorID',
+                        'value' => $descriptorID,
                         'compare' => '='
                     )
                 ),
@@ -62,8 +62,8 @@ Class SyncService {
                     'post_status' => 'publish'
                 ) );
 
-                update_post_meta( $id, 'sessionID', $sessionID );                
-                update_post_meta( $id, 'duration', $data['duration'] );                
+                update_post_meta( $id, 'descriptorID', $descriptorID );                
+                update_post_meta( $id, 'image_url', $data['image_url'] );                
                 
             }
             
@@ -75,19 +75,19 @@ Class SyncService {
 
     /**
      * 
-     * Deletes sessions that are not longer valid
+     * Deletes descriptors that are not longer valid
      * 
-     * @param array $sessions
+     * @param array $descriptors
      */
-    private function delete_sessions( $sessions ) {
+    private function delete_descriptors( $descriptors ) {
 
         $query = new \WP_Query( array (
             'post_type' => 'session',
             'post_status' => 'publish',
             'meta_query' => array (
                 array (
-                    'key' => 'sessionID',
-                    'value' => array_keys( $sessions ),
+                    'key' => 'descriptorID',
+                    'value' => array_keys( $descriptors ),
                     'compare' => 'NOT IN'
                 )
             ),
@@ -105,16 +105,16 @@ Class SyncService {
 
     /**
      * 
-     * Runs on the gixo_get_sessions hourly cron
+     * Runs on the gixo_get_descriptors hourly cron
      * 
-     * @action gixo_get_sessions
+     * @action gixo_get_descriptors
      * 
      */
-    private function get_sessions() {
+    private function get_descriptors() {
 
-        $session_response = wp_remote_get( 'http://alpha.gixo.com/rest/sessions?query_type=all' );
+        $descriptor_response = wp_remote_get( 'https://alpha.gixo.com/rest/sessions/descriptors' );
 
-        return $this->format_response( $session_response );
+        return $this->format_response( $descriptor_response );
         
     }
 
@@ -126,17 +126,17 @@ Class SyncService {
             return;
         }
 
-        $sessions = array ();
+        $descriptors = array ();
 
-        foreach ( $data as $session ) {
+        foreach ( $data as $descriptor ) {
 
-            $sessions[ $session->sessionID ] = array(
-                'title'     => $session->descriptor->title,
-                'duration'  => $session->time->total_seconds
+            $descriptors[ $descriptor->descriptorID ] = array(
+                'title'     => $descriptor->title,
+                'image_url'     => $descriptor->image_url
             );
         }
 
-        return $sessions;
+        return $descriptors;
     }
 
 }
