@@ -137,7 +137,13 @@ Class SyncService {
 
             $descriptors[ $descriptor->descriptorID ] = array(
                 'title'     => $descriptor->title,
-                'image_url'     => $descriptor->image_url
+                'image_url'     => $descriptor->image_url,
+                'level'     => $descriptor->level,
+                'intensity'     => $descriptor->intensity,
+                'pace'     => $descriptor->pace,
+                'vibe'     => $descriptor->vibe,
+                'outdoor'     => $descriptor->outdoor,
+                
             );
         }
 
@@ -145,6 +151,6 @@ Class SyncService {
     }
 
 }
-
+  
 
 
