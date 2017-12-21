@@ -59,7 +59,8 @@ Class SyncService {
                 $id = wp_insert_post( array (
                     'post_title' => $data['title'],
                     'post_type' => 'session',
-                    'post_status' => 'publish'
+                    'post_status' => 'publish',
+                    'post_content' => $data['description']
                 ) );
 
                 update_post_meta( $id, 'descriptorID', $descriptorID );                
@@ -143,6 +144,7 @@ Class SyncService {
                 'pace'     => $descriptor->pace,
                 'vibe'     => $descriptor->vibe,
                 'outdoor'     => $descriptor->outdoor,
+                'description'     => $descriptor->description,
                 
             );
         }
