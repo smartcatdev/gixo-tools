@@ -70,6 +70,7 @@ Class SyncService {
                 update_post_meta( $id, 'pace', $data['pace'] );                
                 update_post_meta( $id, 'vibe', $data['vibe'] );                
                 update_post_meta( $id, 'outdoor', $data['outdoor'] );                
+                update_post_meta( $id, 'total_seconds', $data['total_seconds'] );                
                 
             }
             
@@ -145,7 +146,7 @@ Class SyncService {
                 'vibe'     => $descriptor->vibe,
                 'outdoor'     => $descriptor->outdoor,
                 'description'     => $descriptor->description,
-                
+                'total_seconds'     => $descriptor->total_seconds,
             );
         }
 
