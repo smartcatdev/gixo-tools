@@ -2,7 +2,7 @@
 
 namespace gixo;
 
-add_action( 'init', function() {
+add_action( HOOK, function() {
     
     SyncService::instance();
     
@@ -64,6 +64,11 @@ Class SyncService {
 
                 update_post_meta( $id, 'descriptorID', $descriptorID );                
                 update_post_meta( $id, 'image_url', $data['image_url'] );                
+                update_post_meta( $id, 'level', $data['level'] );                
+                update_post_meta( $id, 'intensity', $data['intensity'] );                
+                update_post_meta( $id, 'pace', $data['pace'] );                
+                update_post_meta( $id, 'vibe', $data['vibe'] );                
+                update_post_meta( $id, 'outdoor', $data['outdoor'] );                
                 
             }
             

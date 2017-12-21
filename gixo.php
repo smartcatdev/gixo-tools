@@ -13,8 +13,12 @@ if( !defined( 'ABSPATH' ) ) {
     die();
 }
 
+const HOOK = 'init';
+
 include_once dirname( __FILE__ ) . '/includes/trait-Singleton.php';
 include_once dirname( __FILE__ ) . '/includes/functions-api-sync.php';
+
+
 
 
 register_activation_hook(__FILE__, 'gixo\activate' );
