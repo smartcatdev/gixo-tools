@@ -39,7 +39,6 @@ Class SyncService {
         
         foreach ( $descriptors as $descriptorID => $data ) {
 
-            
             $query = new \WP_Query( array (
                 'post_type' => 'session',
                 'post_status' => 'publish',
@@ -53,7 +52,21 @@ Class SyncService {
             ) );
             
             if( $query->have_posts() ) {
-                continue;
+                
+                $query->the_post();
+                $this->update_meta( get_the_ID(), array(
+                    'descriptorID'  => $descriptorID,
+                    'image_url'  => $data['image_url'],
+                    'level'  => $data['level'],
+                    'intensity'  => $data['intensity'],
+                    'pace'  => $data['pace'],
+                    'vibe'  => $data['vibe'],
+                    'outdoor'  => $data['outdoor'],
+                    'total_seconds'  => $data['total_seconds'],
+                    'cam_on'  => $data['cam_on'],
+                    'item_labels'  => $data['item_labels'],
+                ) );
+                
             }else {
                 
                 $id = wp_insert_post( array (
@@ -63,14 +76,18 @@ Class SyncService {
                     'post_content' => $data['description']
                 ) );
 
-                update_post_meta( $id, 'descriptorID', $descriptorID );                
-                update_post_meta( $id, 'image_url', $data['image_url'] );                
-                update_post_meta( $id, 'level', $data['level'] );                
-                update_post_meta( $id, 'intensity', $data['intensity'] );                
-                update_post_meta( $id, 'pace', $data['pace'] );                
-                update_post_meta( $id, 'vibe', $data['vibe'] );                
-                update_post_meta( $id, 'outdoor', $data['outdoor'] );                
-                update_post_meta( $id, 'total_seconds', $data['total_seconds'] );                
+                $this->update_meta( $id, array(
+                    'descriptorID'  => $descriptorID,
+                    'image_url'  => $data['image_url'],
+                    'level'  => $data['level'],
+                    'intensity'  => $data['intensity'],
+                    'pace'  => $data['pace'],
+                    'vibe'  => $data['vibe'],
+                    'outdoor'  => $data['outdoor'],
+                    'total_seconds'  => $data['total_seconds'],
+                    'cam_on'  => $data['cam_on'],
+                    'item_labels'  => $data['item_labels'],
+                ) );            
                 
             }
             
@@ -80,6 +97,21 @@ Class SyncService {
         wp_reset_postdata();
     }
 
+    private function update_meta( $id, $args ) {
+        
+        update_post_meta( $id, 'descriptorID', $args['descriptorID'] );                
+        update_post_meta( $id, 'image_url', $args['image_url'] );                
+        update_post_meta( $id, 'level', $args['level'] );                
+        update_post_meta( $id, 'intensity', $args['intensity'] );                
+        update_post_meta( $id, 'pace', $args['pace'] );                
+        update_post_meta( $id, 'vibe', $args['vibe'] );                
+        update_post_meta( $id, 'outdoor', $args['outdoor'] );                
+        update_post_meta( $id, 'total_seconds', $args['total_seconds'] );                
+        update_post_meta( $id, 'cam_on', $args['cam_on'] );                
+        update_post_meta( $id, 'item_labels', implode(',', $args['item_labels'] ) );    
+        
+    }
+    
     /**
      * 
      * Deletes descriptors that are not longer valid
@@ -147,6 +179,8 @@ Class SyncService {
                 'outdoor'     => $descriptor->outdoor,
                 'description'     => $descriptor->description,
                 'total_seconds'     => $descriptor->total_seconds,
+                'cam_on'     => $descriptor->cam_on,
+                'item_labels'     => $descriptor->item_labels,
             );
         }
 
