@@ -13,7 +13,7 @@ if( !defined( 'ABSPATH' ) ) {
     die();
 }
 
-const HOOK = 'init';
+const HOOK = 'gixo_get_sessions';
 
 include_once dirname( __FILE__ ) . '/includes/trait-Singleton.php';
 include_once dirname( __FILE__ ) . '/includes/functions-api-sync.php';
