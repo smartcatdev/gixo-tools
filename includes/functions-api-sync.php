@@ -51,9 +51,16 @@ Class SyncService {
                 ),
             ) );
             
+            // session is already in WP - update existing
             if( $query->have_posts() ) {
                 
                 $query->the_post();
+                
+                wp_update_post( array(
+                    'ID'            => get_the_ID(),
+                    'post_title'    => $data['title']
+                ) );
+                
                 $this->update_meta( get_the_ID(), array(
                     'descriptorID'  => $descriptorID,
                     'image_url'  => $data['image_url'],
@@ -65,8 +72,10 @@ Class SyncService {
                     'total_seconds'  => $data['total_seconds'],
                     'cam_on'  => $data['cam_on'],
                     'item_labels'  => $data['item_labels'],
+                    'index_bool'  => $data['index_bool'],
                 ) );
                 
+            // Session not in WP - add as new
             }else {
                 
                 $id = wp_insert_post( array (
@@ -87,6 +96,7 @@ Class SyncService {
                     'total_seconds'  => $data['total_seconds'],
                     'cam_on'  => $data['cam_on'],
                     'item_labels'  => $data['item_labels'],
+                    'index_bool'  => $data['index_bool'],
                 ) );            
                 
             }
@@ -109,6 +119,7 @@ Class SyncService {
         update_post_meta( $id, 'total_seconds', $args['total_seconds'] );                
         update_post_meta( $id, 'cam_on', $args['cam_on'] );                
         update_post_meta( $id, 'item_labels', implode(',', $args['item_labels'] ) );    
+        update_post_meta( $id, 'index_bool', $args['index_bool'] );
         
     }
     
@@ -151,7 +162,7 @@ Class SyncService {
      */
     private function get_descriptors() {
 
-        $descriptor_response = wp_remote_get( 'https://alpha.gixo.com/rest/sessions/descriptors' );
+        $descriptor_response = wp_remote_get( 'https://api.gixo.com/rest/sessions/descriptors?index_flag=true' );
 
         return $this->format_response( $descriptor_response );
         
@@ -160,7 +171,7 @@ Class SyncService {
     private function format_response( $data ) {
 
         $data = json_decode( wp_remote_retrieve_body( $data ) );
-
+        
         if ( !$data ) {
             return;
         }
@@ -169,6 +180,7 @@ Class SyncService {
 
         foreach ( $data as $descriptor ) {
 
+            
             $descriptors[ $descriptor->descriptorID ] = array(
                 'title'     => $descriptor->title,
                 'image_url'     => $descriptor->image_url,
@@ -181,6 +193,7 @@ Class SyncService {
                 'total_seconds'     => $descriptor->total_seconds,
                 'cam_on'     => $descriptor->cam_on,
                 'item_labels'     => $descriptor->item_labels,
+                'index_bool'           => $descriptor->index
             );
         }
 
